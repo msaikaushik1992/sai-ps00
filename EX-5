@@ -1,8 +1,0 @@
-(define (sq c) (* c c))
-
-    ; sq : Number -> Number
-    ; GIVEN: any random real number.
-    ; RETURNS: the square of that number.
-    ; Examples:
-    ; (sq 5)  => 25
-    ; (sq 99) => 9801
