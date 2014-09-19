@@ -1,0 +1,298 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname robot) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(require rackunit)
+(require "extras.rkt")
+
+
+(provide initial-robot)
+(provide robot-left) 
+(provide robot-right)
+(provide robot-forward)
+(provide robot-north?) 
+(provide robot-south?) 
+(provide robot-east?) 
+(provide robot-west?)
+
+;; Data Definitions:
+(define-struct robot(  x y direction))
+; A Robot is a 
+; (make-Robot circle(  x y direction)
+
+; Interpretation :
+; x is the x co-ordinate of the center of the Robot
+; in the graphic co-ordinate system.
+; y is the y co-ordinate of the center of the Robot        
+; in the graphic co-ordinate system.
+; A direction is one of
+; "north"
+; "south"
+; "east"
+; "west"
+
+
+; initial-robot : Real Real-> Robot
+; GIVEN: a set of (x,y) coordinates
+; RETURNS: a robot with its center at those coordinates, facing north
+; (up).
+; Examples : 
+;  (initial-robot 100 200) -> (make-robot  100 200 "north")
+;  (initial-robot 150 300) -> (make-robot  150 300 "north")
+  
+
+(define (initial-robot x y)
+                        (make-robot x y "north"))
+;Tests:
+
+(begin-for-test
+ (check-equal?  (initial-robot 100 200) (make-robot  100 200 "north")) 
+ (check-equal?  (initial-robot 150 300) (make-robot  150 300 "north")))
+
+
+; robot-left : Robot -> Robot
+; robot-right : Robot -> Robot
+; GIVEN: a robot.
+; RETURNS: a robot like the original, but turned 90 degrees either left
+; or right.
+; Example : 
+; (robot-left (make-robot  100 200 "north")) ->
+;                            (make-robot 100 200 "west").
+; (robot-left (make-robot  100 200 "west")) ->
+;                            (make-robot 100 200 "south").
+; (robot-left (make-robot  100 200 "south")) ->
+;                            (make-robot 100 200 "east").
+; (robot-left (make-robot  100 200 "east")) ->
+;                            (make-robot 100 200 "north"). 
+; (robot-right (make-robot robot-shape 100 200 "east")) ->
+;                           (make-robot 100 200 "south")
+; (robot-right (make-robot robot-shape 100 200 "south")) ->
+;                           (make-robot 100 200 "east")
+; (robot-right (make-robot robot-shape 100 200 "north")) ->
+;                           (make-robot 100 200 "east")
+; (robot-right (make-robot robot-shape 100 200 "west")) ->
+;                           (make-robot 100 200 "north")
+                             
+  (define (robot-left rbt)
+          (cond
+  [(robot-north? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "west")]
+  [(robot-south? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "east")]
+  [(robot-east? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "north")]
+  [(robot-west? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "south")]))
+             
+  (define (robot-right rbt)
+          (cond
+  [(robot-north? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "east")]
+  [(robot-south? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "west")]
+  [(robot-east? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "south")]
+  [(robot-west? rbt) (make-robot (robot-x rbt) (robot-y rbt) 
+                                  "north")]))
+ ;Tests
+  
+ (begin-for-test
+ (check-equal? (robot-left (make-robot  100 200 "north"))
+                            (make-robot 100 200 "west"))
+ (check-equal? (robot-left (make-robot  100 200 "west")) 
+                            (make-robot 100 200 "south"))
+ (check-equal? (robot-left (make-robot  100 200 "south")) 
+                            (make-robot 100 200 "east"))
+ (check-equal? (robot-left (make-robot  100 200 "east")) 
+                           (make-robot 100 200 "north")) 
+ (check-equal? (robot-right (make-robot  100 200 "east")) 
+                           (make-robot 100 200 "south"))
+ (check-equal? (robot-right (make-robot  100 200 "south")) 
+                           (make-robot 100 200 "west"))
+ (check-equal? (robot-right (make-robot  100 200 "north")) 
+                           (make-robot 100 200 "east"))
+ (check-equal? (robot-right (make-robot 100 200 "west")) 
+                           (make-robot 100 200 "north")))
+  
+  
+; robot-forward : Robot PosInt -> Robot
+; GIVEN: a robot and a distance.
+; RETURNS: a robot like the given one, but moved forward by the
+; specified distance.
+; Examples :
+; (robot-forward (make-robot 100 200 "north") 25) -> (make-robot 100 175 "north")
+; (robot-forward (make-robot 100 200 "south") 25) -> (make-robot 100 175 "south")
+; (robot-forward (make-robot 100 200 "east") 25)  -> (make-robot 75 200 "east")
+; (robot-forward (make-robot 100 200 "west") 25)  -> (make-robot 125 200 "west")
+; (robot-forward (make-robot -10 -10 "north") 25) -> (make-robot -10 -35 "north")
+; (robot-forward (make-robot 0 400 "south") 25)   -> (make-robot 0 425 "south")
+  
+   
+(define (robot-forward rbt dist)
+(cond
+ [(and (inside? rbt) (robot-north? rbt)) (robot-moving-y rbt dist)]
+ [(and (inside? rbt) (robot-south? rbt)) (robot-moving-y rbt dist)]
+ [(and (inside? rbt) (robot-east? rbt)) (robot-moving-x rbt dist)]
+ [(and (inside? rbt) (robot-west? rbt)) (robot-moving-x rbt dist)]
+ [else (robot-moving-out rbt dist)]))
+
+;tests
+(begin-for-test
+ (check-equal? (robot-forward (make-robot 100 200 "north") 25) 
+                              (make-robot 100 175 "north"))
+ (check-equal? (robot-forward (make-robot 100 200 "south") 25) 
+                              (make-robot 100 225 "south"))
+ (check-equal? (robot-forward (make-robot 100 200 "east") 25) 
+                              (make-robot 75 200 "east"))
+ (check-equal? (robot-forward (make-robot 100 200 "west") 25) 
+                              (make-robot 125 200 "west"))
+ (check-equal? (robot-forward (make-robot -10 -10 "north") 25) 
+                              (make-robot -10 -35 "north"))
+ (check-equal? (robot-forward (make-robot 0 400 "south") 25) 
+                              (make-robot 0 425 "south")))
+
+
+; robot-moving-x : Robot PosInt -> Robot
+; GIVEN: a robot and a distance.
+; RETURNS: a robot like the given one but moved in x(horizontal) direction.
+; by a specified distance inside the room.
+; WHERE: direction is either "east" or "west". 
+; Examples :
+;(robot-moving-x (make robot 60 20 "east") 30) -> (make-robot 30 20 "east")
+;(robot-moving-x (make robot 60 20 "west") 30) -> (make-robot 90 20 "west")
+   
+  (define (robot-moving-x rbt dist)
+  (cond
+  [(robot-east? rbt) 
+  (make-robot  (- (robot-x rbt) dist) (robot-y rbt) (robot-direction rbt))]
+  [(robot-west? rbt)
+ (make-robot (+ (robot-x rbt) dist) (robot-y rbt) (robot-direction rbt))]))
+  
+;tests.
+(begin-for-test
+  (check-equal? (robot-moving-x (make-robot 60 20 "east") 30)
+                (make-robot 30 20 "east"))
+  (check-equal? (robot-moving-x (make-robot 60 20 "west") 30)
+                (make-robot 90 20 "west")))
+
+; robot-moving-y : Robot PosInt -> Robot
+; GIVEN: a robot and a distance.
+; RETURNS: a robot like the given one but moved in y (vertical) direction.
+; by a specified distance inside the room.
+; WHERE: direction is either "north" or "south". 
+; Examples :
+;(robot-moving-y (make robot 60 50 "north") 30) -> (make-robot 60 20 "north")
+;(robot-moving-y (make robot 60 50 "south") 30) -> (make-robot 60 80 "south")
+    
+  (define (robot-moving-y rbt dist)
+ (cond
+    [(robot-north? rbt)
+   (make-robot (robot-x rbt) (- (robot-y rbt) dist) (robot-direction rbt))]
+   [(robot-south? rbt)
+   (make-robot (robot-x rbt) (+ (robot-y rbt) dist) (robot-direction rbt))]
+   ))
+;tests.
+  (begin-for-test
+    (check-equal? (robot-moving-y (make-robot 60 50 "north") 30)
+                  (make-robot 60 20 "north"))
+    (check-equal? (robot-moving-y (make-robot 60 50 "south") 30)
+                  (make-robot 60 80 "south")))
+
+; inside? : Robot -> Boolean
+; GIVEN: a robot.
+; RETURNS: true if the center of the robot is inside the room.
+; Examples :
+; (inside? (make-robot 20 20 "north")  -> true
+; (inside? (make-robot 185 135 "south) -> true
+; (inside? (make-robot 20 20 "east"))  -> true
+; (inside? (make-robot 20 20 "west"))  -> true
+ (define (inside? rbt)
+  (and (and (<= 15 (robot-x rbt)) (<= (robot-x rbt) 185))
+  (and (<= 15 (robot-y rbt)) (<= (robot-y rbt) 385))))
+ 
+;tests
+ (begin-for-test
+   (check-equal? (inside? (make-robot 20 20 "north")) true)
+   (check-equal? (inside? (make-robot 185 135 "south")) true)
+   (check-equal? (inside? (make-robot 20 20 "east")) true)
+   (check-equal? (inside? (make-robot 20 20 "west")) true))
+   
+
+; robot-moving-out : Robot PosReal -> Robot
+; GIVEN: a robot and a distance.
+; RETURNS: a robot like the given one moved in a specified. 
+; direction, by a specified distance outside the room only.
+; Examples :
+; (robot-moving-out (make-robot -10 -10 "north") 20) -> (make-robot -10 -30 "north")
+; (robot-moving-out (make-robot 400 400 "east") 20)  -> (make-robot 380 400 "east")
+; (robot-moving-out (make-robot 400 400 "west") 20)  -> (make-robot 420 400 "west")   
+ (define (robot-moving-out rbt dist)
+  (cond
+  [(robot-east? rbt) 
+(make-robot (- (robot-x rbt) dist) (robot-y rbt) (robot-direction rbt))]
+ [(robot-west? rbt) 
+(make-robot (+ (robot-x rbt) dist) (robot-y rbt) (robot-direction rbt))]
+[(robot-north? rbt) 
+(make-robot  (robot-x rbt) (- (robot-y rbt) dist) (robot-direction rbt))]
+[(robot-south? rbt) 
+(make-robot  (robot-x rbt) (+ (robot-y rbt) dist) (robot-direction rbt))]))
+ 
+;test.
+ (begin-for-test
+   (check-equal? (robot-moving-out (make-robot -10 -10 "north") 20)
+                 (make-robot -10 -30 "north"))
+   (check-equal? (robot-moving-out (make-robot 400 400 "east") 20)
+                 (make-robot 380 400 "east"))
+    (check-equal? (robot-moving-out (make-robot 400 400 "west") 20)
+                 (make-robot 420 400 "west")))
+
+; robot-north? : Robot -> Boolean
+; robot-south? : Robot -> Boolean
+; robot-east? : Robot -> Boolean
+; robot-west? : Robot -> Boolean
+; GIVEN: a robot.
+; RETURNS: whether the robot is facing in the specified direction.
+; Examples:
+; (robot-north (make-robot 10 20 "north")) -> true
+; (robot-north (make-robot 10 20 "south")) -> false
+; (robot-south (make-robot 10 20 "south")) -> true
+; (robot-south (make-robot 10 20 "north")) -> false
+; (robot-east  (make-robot 10 20 "east")) -> true
+; (robot-east  (make-robot 10 20 "north")) -> false
+; (robot-west  (make-robot 10 20 "west")) -> true
+; (robot-west  (make-robot 10 20 "north")) -> false
+
+ 
+ (define (robot-north? rbt)
+        (if (string=? (robot-direction rbt) "north")
+            true false))
+
+(define (robot-south? rbt)
+        (if (string=? (robot-direction rbt) "south")
+            true false))
+ 
+(define (robot-east? rbt)
+        (if (string=? (robot-direction rbt) "east")
+            true false))
+ 
+(define (robot-west? rbt)
+        (if (string=? (robot-direction rbt) "west")
+            true false))
+;tests.
+(begin-for-test
+ (check-equal? (robot-north? (make-robot 10 20 "north")) true)
+ (check-equal? (robot-south? (make-robot 10 20 "south")) true)
+ (check-equal? (robot-east? (make-robot 10 20 "east")) true)
+ (check-equal? (robot-west? (make-robot 10 20 "west")) true))
+ 
+ 
+   
+                   
+ 
+
+ 
+ 
+
+
+                         
+
+  

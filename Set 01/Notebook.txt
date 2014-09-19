@@ -1,0 +1,24 @@
+
+Date	Who	Start	Stop	Interruptions	Question	TimeOnTask	Comments
+9/18    MSK	11:00	2:42                      Q1            222		partially (85%) completed set01 problem1.
+9/19    MSK     12:20   1:15                      Q1		50		tested some of the functions in the program.
+9/19	MSK	3:12	3:13			  				Cloned my repository to Github folder and comitted.
+9/19	MSK	3:14	4:00			  Q1		46		Completed problem1 in set01.
+
+
+
+=========================================comitting to git : 9/19  2:46 am  ==========================================================================================================
+
+=========================================comitting to git : 9/19  1:18 pm  ============================================================================================
+
+
+						
+
+
+
+
+
+
+
+
+
